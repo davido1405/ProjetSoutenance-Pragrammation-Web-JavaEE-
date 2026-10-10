@@ -1,0 +1,5 @@
+@charset "UTF-8";
+
+@import "tailwindcss";
+
+@source "../WEB-INF/pages/\*/\*";
