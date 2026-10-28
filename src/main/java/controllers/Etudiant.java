@@ -40,6 +40,7 @@ public class Etudiant extends HttpServlet {
 		if (page == null) page = "tableauDeBord";
 
 		try {
+			request.setAttribute("dateJour", utils.DateUtils.aujourdHui());
 			Soutenance maSoutenance = SoutenanceDAO.getByEtudiant(etu.getMatriculEtu());
 			request.setAttribute("maSoutenance", maSoutenance);
 			request.setAttribute("etudiant", EtudiantsDAO.getByMatricule(etu.getMatriculEtu()));

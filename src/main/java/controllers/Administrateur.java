@@ -18,6 +18,7 @@ import models.Enseignants;
 import models.Etudiants;
 import models.Soutenance;
 import models.Utilisateurs;
+import utils.DateUtils;
 
 @WebServlet(name = "administrateur", urlPatterns = { "/administrateur" })
 public class Administrateur extends HttpServlet {
@@ -28,6 +29,10 @@ public class Administrateur extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		// Administrateur.doPost(), tout en haut de la méthode
+		System.out.println("[POST] page=" + request.getParameter("page") + " action=" + request.getParameter("action") + " matricule=" + request.getParameter("matricule"));
+
 		HttpSession session = request.getSession(false);
 		if (session == null || session.getAttribute("ConnectedUser") == null) {
 			response.sendRedirect(request.getContextPath() + "/authPage.jsp");
@@ -41,7 +46,18 @@ public class Administrateur extends HttpServlet {
 
 		String page = request.getParameter("page");
 		String fragment = null;
+		// Éviter que le navigateur réaffiche une ancienne version de la liste (cache)
+		response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+		response.setHeader("Pragma", "no-cache");
+		response.setDateHeader("Expires", 0);
 		try {
+			request.setAttribute("dateJour", DateUtils.aujourdHui());
+			request.setAttribute("nbSoutenances", SoutenanceDAO.nbSoutenances());
+			request.setAttribute("nbEtudiants", EtudiantsDAO.nbEtudiantInscrit());
+			request.setAttribute("nbEnseignants", EnseignantsDAO.nbEnseignants());
+			//Chargés pour toutes les pages : la modale « Planifier » du layout en a besoin
+			request.setAttribute("etudiants", EtudiantsDAO.getAll());
+			request.setAttribute("enseignants", EnseignantsDAO.getAll());
 			String modif = request.getParameter("modifier");
 			if (modif != null && !modif.isEmpty() && page != null) {
 				switch (page) {
@@ -62,16 +78,17 @@ public class Administrateur extends HttpServlet {
 			switch (page == null ? "" : page) {
 			case "etudiants":
 				String q = request.getParameter("q");
-				request.setAttribute("etudiants",
-					(q != null && !q.trim().isEmpty()) ? EtudiantsDAO.rechercher(q.trim()) : EtudiantsDAO.getAll());
+				if (q != null && !q.trim().isEmpty()) {
+					request.setAttribute("etudiants", EtudiantsDAO.rechercher(q.trim()));
+				}
 				request.setAttribute("filieres", EtudiantsDAO.getFilieres());
 				request.setAttribute("niveaux", EtudiantsDAO.getNiveaux());
-				request.setAttribute("enseignants", EnseignantsDAO.getAll());
 				fragment = "/WEB-INF/pages/admin/etudiants.jsp";
 				break;
 
 			case "encadreursJurys":
-				java.util.List<models.Enseignants> enseignants = EnseignantsDAO.getAll();
+				@SuppressWarnings("unchecked")
+				java.util.List<models.Enseignants> enseignants = (java.util.List<models.Enseignants>) request.getAttribute("enseignants");
 				String qE = request.getParameter("q");
 				if (qE != null && !qE.trim().isEmpty()) {
 					final String qq = qE.trim().toLowerCase();
@@ -80,15 +97,13 @@ public class Administrateur extends HttpServlet {
 						|| (x.getPrenomuser() != null && x.getPrenomuser().toLowerCase().contains(qq))
 						|| (x.getMatriculEns() != null && x.getMatriculEns().toLowerCase().contains(qq))
 					).collect(java.util.stream.Collectors.toList()));
+					request.setAttribute("enseignants", enseignants);
 				}
-				request.setAttribute("enseignants", enseignants);
 				request.setAttribute("specialites", EnseignantsDAO.getSpecialites());
 				fragment = "/WEB-INF/pages/admin/encadreursJurys.jsp";
 				break;
 
 			case "soutenances":
-				request.setAttribute("etudiants", EtudiantsDAO.getAll());
-				request.setAttribute("enseignants", EnseignantsDAO.getAll());
 				java.util.List<models.Soutenance> soutenances = SoutenanceDAO.getAll();
 				String qS = request.getParameter("q");
 				if (qS != null && !qS.trim().isEmpty()) {
@@ -126,13 +141,11 @@ public class Administrateur extends HttpServlet {
 				break;
 
 			default: // tableauDeBord
-				request.setAttribute("nbEtudiants", EtudiantsDAO.nbEtudiantInscrit());
-				request.setAttribute("nbEnseignants", EnseignantsDAO.nbEnseignants());
-				request.setAttribute("nbSoutenances", SoutenanceDAO.nbSoutenances());
 				request.setAttribute("nbEvaluees", SoutenanceDAO.nbSoutenancesEvaluees());
 				request.setAttribute("soutenances", SoutenanceDAO.getAll());
-				request.setAttribute("etudiants", EtudiantsDAO.getAll());
-				request.setAttribute("enseignants", EnseignantsDAO.getAll());
+				request.setAttribute("nbFilieres", EtudiantsDAO.getFilieres().size());
+				request.setAttribute("nbSoutenancesSemaine", SoutenanceDAO.nbSoutenancesSemaine());
+				request.setAttribute("moyenneGenerale", EvaluationDAO.moyenneGenerale());
 				fragment = "/WEB-INF/pages/admin/mainTableauDeBord.jsp";
 			}
 			request.setAttribute("cheminContenu", fragment);
@@ -156,14 +169,28 @@ public class Administrateur extends HttpServlet {
 		}
 
 		String page = request.getParameter("page");
+		
 		String action = request.getParameter("action");
-		if (action == null) action = "ajouter";
+		if (action == null || action.isBlank()) {
+		    response.sendRedirect(request.getContextPath() + "/administrateur?page="
+		            + (request.getParameter("page") != null ? request.getParameter("page") : "")
+		            + "&info=actionInconnue");
+		    return;
+		}
+		String info = null;
+		response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
 		try {
 			switch (page == null ? "" : page) {
 			case "etudiants":
 				switch (action) {
 				case "deleteEtudiant":
-					EtudiantsDAO.supprimer(request.getParameter("matricule"));
+					try {
+						boolean supprime = EtudiantsDAO.supprimer(request.getParameter("matricule"));
+						info = supprime ? "etudiantSupprime" : "etudiantIntrouvable";
+					} catch (SQLException ex) {
+						ex.printStackTrace();
+						info = "suppressionImpossible";
+					}
 					break;
 				case "updateEtudiant":
 					Etudiants etuU = new Etudiants();
@@ -177,9 +204,15 @@ public class Administrateur extends HttpServlet {
 					etuU.setNiveau(Integer.parseInt(request.getParameter("id_niveau")));
 					etuU.setMatriculeenca(request.getParameter("encadrant"));
 					etuU.setSujet(request.getParameter("sujet"));
-					EtudiantsDAO.modifier(etuU);
+					try {
+						EtudiantsDAO.modifier(etuU);
+						info = "etudiantModifie";
+					} catch (SQLException ex) {
+						ex.printStackTrace();
+						info = "enregistrementImpossible";
+					}
 					break;
-				default:
+				case "ajouter":
 					Etudiants etu = new Etudiants();
 					etu.setMatriculEtu(request.getParameter("matricule"));
 					etu.setNomuser(request.getParameter("nom"));
@@ -191,14 +224,26 @@ public class Administrateur extends HttpServlet {
 					etu.setNiveau(Integer.parseInt(request.getParameter("id_niveau")));
 					etu.setMatriculeenca(request.getParameter("encadrant"));
 					etu.setSujet(request.getParameter("sujet"));
-					EtudiantsDAO.ajouter(etu);
+					try {
+						EtudiantsDAO.ajouter(etu);
+						info = "etudiantAjoute";
+					} catch (SQLException ex) {
+						ex.printStackTrace();
+						info = "enregistrementImpossible";
+					}
 				}
 				break;
 
 			case "encadreursJurys":
 				switch (action) {
 				case "deleteEnseignant":
-					EnseignantsDAO.supprimer(request.getParameter("matricule"));
+					try {
+						boolean supprimeEns = EnseignantsDAO.supprimer(request.getParameter("matricule"));
+						info = supprimeEns ? "encadreurSupprime" : "encadreurIntrouvable";
+					} catch (SQLException ex) {
+						ex.printStackTrace();
+						info = "suppressionImpossible";
+					}
 					break;
 				case "updateEnseignant":
 					Enseignants ensU = new Enseignants();
@@ -209,7 +254,13 @@ public class Administrateur extends HttpServlet {
 					ensU.setContactuser(request.getParameter("contact"));
 					ensU.setAdresseuser(request.getParameter("adresse"));
 					ensU.setSpecialite(Integer.parseInt(request.getParameter("id_specialite")));
-					EnseignantsDAO.modifier(ensU);
+					try {
+						EnseignantsDAO.modifier(ensU);
+						info = "encadreurModifie";
+					} catch (SQLException ex) {
+						ex.printStackTrace();
+						info = "enregistrementImpossible";
+					}
 					break;
 				default:
 					Enseignants ens = new Enseignants();
@@ -220,7 +271,13 @@ public class Administrateur extends HttpServlet {
 					ens.setContactuser(request.getParameter("contact"));
 					ens.setAdresseuser(request.getParameter("adresse"));
 					ens.setSpecialite(Integer.parseInt(request.getParameter("id_specialite")));
-					EnseignantsDAO.ajouter(ens);
+					try {
+						EnseignantsDAO.ajouter(ens);
+						info = "encadreurAjoute";
+					} catch (SQLException ex) {
+						ex.printStackTrace();
+						info = "enregistrementImpossible";
+					}
 				}
 				break;
 
@@ -240,25 +297,42 @@ public class Administrateur extends HttpServlet {
 					sU.setIdsoutenance(Integer.parseInt(request.getParameter("id_soutenance")));
 					SoutenanceDAO.modifier(sU);
 					break;
+				case "planifier":
 				default:
-					Soutenance s = new Soutenance();
-					s.setMatriculeetu(request.getParameter("matricule_etu"));
-					s.setSallesoutenance(request.getParameter("salle"));
-					String dateHeure = request.getParameter("date_heure"); // yyyy-MM-ddTHH:mm
-					s.setDatesoutenance(Timestamp.valueOf(dateHeure.replace('T', ' ') + ":00"));
 					String[] jury = request.getParameterValues("jury");
-					String[] qualites = new String[jury != null ? jury.length : 0];
-					for (int i = 0; i < qualites.length; i++) {
-						String q = request.getParameter("qualite_" + jury[i]);
-						qualites[i] = (q != null && !q.isEmpty()) ? q : (i == 0 ? "President" : "Examinateur");
+					String matriculeEtu = request.getParameter("matricule_etu");
+					String dateHeure = request.getParameter("date_heure"); // yyyy-MM-ddTHH:mm
+					if (matriculeEtu == null || matriculeEtu.trim().isEmpty()) {
+						info = "etudiantRequis";
+					} else if (dateHeure == null || dateHeure.trim().isEmpty()) {
+						info = "dateRequise";
+					} else if (jury == null || jury.length < 2) {
+						info = "juryInsuffisant";
+					} else {
+						Soutenance s = new Soutenance();
+						s.setMatriculeetu(matriculeEtu);
+						s.setSallesoutenance(request.getParameter("salle"));
+						s.setDatesoutenance(Timestamp.valueOf(dateHeure.replace('T', ' ') + ":00"));
+						String[] qualites = new String[jury.length];
+						for (int i = 0; i < qualites.length; i++) {
+							String q = request.getParameter("qualite_" + jury[i]);
+							qualites[i] = (q != null && !q.isEmpty()) ? q : (i == 0 ? "President" : "Examinateur");
+						}
+						try {
+							SoutenanceDAO.creer(s, jury, qualites);
+							info = "soutenancePlanifiee";
+						} catch (SQLException ex) {
+							ex.printStackTrace();
+							info = "planificationImpossible";
+						}
 					}
-					SoutenanceDAO.creer(s, jury, qualites);
 				}
 				break;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		response.sendRedirect(request.getContextPath() + "/administrateur?page=" + (page == null ? "tableauDeBord" : page));
+		response.sendRedirect(request.getContextPath() + "/administrateur?page=" + (page == null ? "tableauDeBord" : page)
+				+ (info == null ? "" : "&info=" + info));
 	}
 }

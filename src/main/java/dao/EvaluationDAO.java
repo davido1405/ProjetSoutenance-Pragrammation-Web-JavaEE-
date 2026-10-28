@@ -81,8 +81,7 @@ public class EvaluationDAO {
 	}
 
 	//Note finale = moyenne des notes du jury, sinon null si toutes ne sont pas saisies
-	public static Double getNoteFinale(int idSoutenance) throws SQLException {
-		String reqTotal = "SELECT COUNT(*) AS total, SUM(CASE WHEN note IS NOT NULL THEN 1 ELSE 0 END) AS notees FROM evaluation WHERE id_soutenance=?";
+	public static Double getNoteFinale(int idSoutenance) throws SQLException {		String reqTotal = "SELECT COUNT(*) AS total, SUM(CASE WHEN note IS NOT NULL THEN 1 ELSE 0 END) AS notees FROM evaluation WHERE id_soutenance=?";
 		String reqMoy   = "SELECT AVG(note) FROM evaluation WHERE id_soutenance=?";
 
 		try (Connection connexion = ConnexionBD.getConnection()) {
@@ -111,6 +110,19 @@ public class EvaluationDAO {
 						}
 					}
 				}
+			}
+		}
+		return null;
+	}
+
+	//Moyenne générale de toutes les notes saisies (statistique tableau de bord admin)
+	public static Double moyenneGenerale() throws SQLException {
+		String req = "SELECT AVG(note) FROM evaluation WHERE note IS NOT NULL";
+		try (Connection connexion = ConnexionBD.getConnection();
+		     PreparedStatement p = connexion.prepareStatement(req);
+		     ResultSet rs = p.executeQuery()) {
+			if (rs.next() && rs.getObject(1) != null) {
+				return Math.round(rs.getDouble(1) * 100.0) / 100.0;
 			}
 		}
 		return null;

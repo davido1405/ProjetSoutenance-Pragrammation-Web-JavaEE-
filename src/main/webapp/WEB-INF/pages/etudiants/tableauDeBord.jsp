@@ -54,14 +54,14 @@
       </div>
 
       <div class="rounded-2xl bg-[#E7EFDF] p-8 mb-8">
-        <p class="text-xs tracking-widest uppercase text-[#5B7A4A] mb-3">Lundi 16 juin 2025</p>
+        <p class="text-xs tracking-widest uppercase text-[#5B7A4A] mb-3">${dateJour}</p>
         <h2 class="text-3xl font-medium text-[#2F3A2F] max-w-md mb-3">Bonjour ${ConnectedUser.prenomuser}, votre grand moment approche.</h2>
         <p class="text-sm text-[#5B5A4E] mb-5">Votre projet a fait du chemin. Il est temps de le partager.</p>
         <a href="${pageContext.request.contextPath}/Etudiant?page=maSoutenance" class="text-sm text-[#2F5B45] font-medium">Voir ma soutenance →</a>
       </div>
 
       <div class="grid md:grid-cols-3 gap-5 mb-8">
-        <div class="bg-white rounded-xl border border-[#ECEEE6] p-5"><p class="text-sm text-[#6E6D5F] mb-3">Mon rendez-vous</p><p class="text-4xl font-medium mb-2">${maSoutenance != null ? maSoutenance.libelleDateHeure : "—"}</p><p class="text-xs text-[#9A9886]"><span class="bg-[#E7EFDF] text-[#5B7A4A] rounded px-1.5 py-0.5">↗ ${maSoutenance.sallesoutenance}</span> ${maSoutenance.statutsoutenance}</p></div>
+        <div class="bg-white rounded-xl border border-[#ECEEE6] p-5"><p class="text-sm text-[#6E6D5F] mb-3">Mon rendez-vous</p><p class="text-4xl font-medium mb-2">${maSoutenance != null ? maSoutenance.libelleDateHeure : "—"}</p><p class="text-xs text-[#9A9886]"><span class="bg-[#E7EFDF] text-[#5B7A4A] rounded px-1.5 py-0.5">↗ ${maSoutenance != null ? maSoutenance.sallesoutenance : '—'}</span> ${maSoutenance != null ? maSoutenance.statutsoutenance : 'Non planifiée'}</p></div>
         <div class="bg-white rounded-xl border border-[#ECEEE6] p-5"><p class="text-sm text-[#6E6D5F] mb-3">Mon jury</p><p class="text-4xl font-medium mb-2">${jurys.size()}</p><p class="text-xs text-[#9A9886]"><span class="bg-[#E6EEF5] text-[#4A6E8A] rounded px-1.5 py-0.5">membres</span> pour vous accompagner</p></div>
         <div class="bg-white rounded-xl border border-[#ECEEE6] p-5"><p class="text-sm text-[#6E6D5F] mb-3">Mon résultat</p><p class="text-4xl font-medium mb-2">${noteFinale != null ? noteFinale : "À venir"}</p><p class="text-xs text-[#9A9886]"><span class="bg-[#F5E9DE] text-[#B07A45] rounded px-1.5 py-0.5">${noteFinale != null ? "/ 20" : "Après la soutenance"}</span></p></div>
       </div>
@@ -69,7 +69,7 @@
       <div class="grid md:grid-cols-3 gap-5">
         <div class="md:col-span-2 bg-white rounded-xl border border-[#ECEEE6] p-6">
           <p class="text-xs tracking-widest uppercase text-[#9A9886] mb-2">Votre grand rendez-vous</p>
-          <div class="flex items-center justify-between mb-5"><h3 class="text-lg font-medium">Ma soutenance de fin d'études</h3><span class="bg-[#E7EFDF] text-[#5B7A4A] rounded-md px-2.5 py-1 text-xs">● Planifiée</span></div>
+          <div class="flex items-center justify-between mb-5"><h3 class="text-lg font-medium">Ma soutenance de fin d'études</h3><span class="bg-[#E7EFDF] text-[#5B7A4A] rounded-md px-2.5 py-1 text-xs">● ${maSoutenance != null ? maSoutenance.statutsoutenance : 'Non planifiée'}</span></div>
           <div class="bg-[#F7F9F0] rounded-xl p-5 mb-5">
             <p class="text-xs tracking-widest uppercase text-[#9A9886] mb-2">${etudiant.niveauLib} · ${etudiant.filiereLib}</p>
             <p class="text-xl text-[#5B7A4A] font-medium mb-2">${etudiant.sujet}</p>

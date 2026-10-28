@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class ConnexionBD {
 
-	private static final String URL = "jdbc:mysql://localhost:3306/soutena?useSSL=false&serverTimezone=UTC";
+	private static final String URL = "jdbc:mysql://127.0.0.1:3306/soutena?useSSL=false&serverTimezone=UTC";
     private static final String UTILISATEUR = "root";
     private static final String MOT_DE_PASSE = "";
 

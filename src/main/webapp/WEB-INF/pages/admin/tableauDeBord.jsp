@@ -32,19 +32,19 @@
 
     <p class="text-xs tracking-widest uppercase text-[#7E9078] mt-6 mb-3">Espace de gestion</p>
     <nav class="flex flex-col gap-1 text-sm">
-      <a href="${pageContext.request.contextPath}/administrateur?page=tableauDeBord" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2F5B45] text-white">
+      <a href="${pageContext.request.contextPath}/administrateur?page=tableauDeBord" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${empty param.page || param.page == 'tableauDeBord' ? 'bg-[#2F5B45] text-white' : 'hover:bg-[#2A3F31]'}">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Tableau de bord</a>
-      <a href="${pageContext.request.contextPath}/administrateur?page=etudiants" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#2A3F31]">
+      <a href="${pageContext.request.contextPath}/administrateur?page=etudiants" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${param.page == 'etudiants' ? 'bg-[#2F5B45] text-white' : 'hover:bg-[#2A3F31]'}">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M22 9 12 4 2 9l10 5 10-5Z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg>
-        Étudiants</a>
-      <a href="${pageContext.request.contextPath}/administrateur?page=encadreursJurys" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#2A3F31]">
+        Étudiants <span class="ml-auto text-xs bg-[#2A3F31] px-2 py-0.5 rounded">${nbEtudiants}</span></a>
+      <a href="${pageContext.request.contextPath}/administrateur?page=encadreursJurys" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${param.page == 'encadreursJurys' ? 'bg-[#2F5B45] text-white' : 'hover:bg-[#2A3F31]'}">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3 2.5-5 6-5s6 2 6 5M14 15.5c2.8.3 4.5 2 4.5 4.5"/></svg>
-        Encadreurs &amp; jurys</a>
-      <a href="${pageContext.request.contextPath}/administrateur?page=soutenances" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#2A3F31]">
+        Encadreurs &amp; jurys <span class="ml-auto text-xs bg-[#2A3F31] px-2 py-0.5 rounded">${nbEnseignants}</span></a>
+      <a href="${pageContext.request.contextPath}/administrateur?page=soutenances" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${param.page == 'soutenances' ? 'bg-[#2F5B45] text-white' : 'hover:bg-[#2A3F31]'}">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-        Soutenances <span class="ml-auto text-xs bg-[#2A3F31] px-2 py-0.5 rounded">24</span></a>
-      <a href="${pageContext.request.contextPath}/administrateur?page=evaluations" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#2A3F31]">
+        Soutenances <span class="ml-auto text-xs bg-[#2A3F31] px-2 py-0.5 rounded">${nbSoutenances}</span></a>
+      <a href="${pageContext.request.contextPath}/administrateur?page=evaluations" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${param.page == 'evaluations' ? 'bg-[#2F5B45] text-white' : 'hover:bg-[#2A3F31]'}">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="9" r="5"/><path d="M8 13.5 6.5 21 12 18l5.5 3-1.5-7.5"/></svg>
         Évaluations</a>
     </nav>
@@ -82,8 +82,9 @@
     <h2 class="text-2xl font-medium text-[#2F3A2F] mb-1">Planifier une soutenance</h2>
     <p class="text-sm text-[#6E6D5F] mb-6">Un étudiant, un créneau, un jury. La prochaine étape commence ici.</p>
     <form action="${pageContext.request.contextPath}/administrateur?page=soutenances" method="post" class="flex flex-col gap-4">
+      <input type="hidden" name="action" value="planifier">
       <div><label class="block text-sm text-[#2F3A2F] mb-1.5">Étudiant</label>
-        <select name="matricule_etu" class="w-full border border-[#E3E1D6] rounded-lg px-4 py-3 text-sm">
+        <select name="matricule_etu" required class="w-full border border-[#E3E1D6] rounded-lg px-4 py-3 text-sm">
           <option value="">Sélectionner un étudiant</option>
           <c:forEach var="e" items="${etudiants}"><option value="${e.matriculEtu}">${e.nomuser} ${e.prenomuser}</option></c:forEach>
         </select></div>

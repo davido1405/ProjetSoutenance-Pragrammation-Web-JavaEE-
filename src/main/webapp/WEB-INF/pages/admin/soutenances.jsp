@@ -1,8 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <div class="flex items-center justify-between px-8 py-4 bg-white border-b border-[#E9EAE2]">
       <p class="text-sm text-[#6E6D5F]">Espace administrateur <span class="mx-2">›</span> <span class="text-[#2F3A2F]">Soutenances</span></p>
       <span class="text-sm text-[#6E6D5F] border border-[#E3E1D6] rounded-md px-3 py-1.5">2024 — 2025</span>
+    </div>
+    <div class="px-8 pt-6">
+      <c:if test="${param.info == 'soutenancePlanifiee'}">
+        <div class="rounded-lg border border-[#C9DCC0] bg-[#EFF5EA] text-[#3F6134] px-4 py-3 text-sm">La soutenance a été planifiée et le jury a été enregistré.</div>
+      </c:if>
+      <c:if test="${param.info == 'juryInsuffisant'}">
+        <div class="rounded-lg border border-[#E8D9B8] bg-[#FBF5E7] text-[#8A6A2F] px-4 py-3 text-sm">Sélectionnez au moins deux membres du jury pour planifier la soutenance.</div>
+      </c:if>
+      <c:if test="${param.info == 'etudiantRequis' || param.info == 'dateRequise'}">
+        <div class="rounded-lg border border-[#E8D9B8] bg-[#FBF5E7] text-[#8A6A2F] px-4 py-3 text-sm">L'étudiant et la date/heure sont obligatoires.</div>
+      </c:if>
+      <c:if test="${param.info == 'planificationImpossible'}">
+        <div class="rounded-lg border border-[#E8C8CF] bg-[#FBEEF1] text-[#A4485E] px-4 py-3 text-sm">Planification impossible : la soutenance n'a pas été enregistrée.</div>
+      </c:if>
     </div>
     <div class="px-8 py-8">
       <p class="text-xs tracking-widest uppercase text-[#9A9886] mb-2">Votre espace, en un coup d'œil</p>
@@ -46,7 +61,7 @@
       <button type="button" onclick="closeModal('modalDetail')" class="text-[#9A9886] hover:text-[#2F3A2F] text-xl leading-none">×</button>
     </div>
     <div class="flex items-center gap-4 mb-6">
-      <span class="w-12 h-12 rounded-full bg-[#EFE7F5] text-[#7A4F8A] flex items-center justify-center">${detailSoutenance.prenometu.substring(0,1)}${detailSoutenance.nometu.substring(0,1)}</span>
+      <span class="w-12 h-12 rounded-full bg-[#EFE7F5] text-[#7A4F8A] flex items-center justify-center">${fn:substring(detailSoutenance.prenometu,0,1)}${fn:substring(detailSoutenance.nometu,0,1)}</span>
       <div><p class="text-xl font-medium text-[#2F3A2F]">${detailSoutenance.nometu} ${detailSoutenance.prenometu}</p><p class="text-xs text-[#9A9886]">${detailSoutenance.matriculeetu} · ${detailSoutenance.filierelib}</p></div>
     </div>
     <div class="bg-[#F7F9F0] rounded-xl p-4 mb-6">
@@ -61,7 +76,7 @@
     <p class="text-sm font-medium text-[#5B7A4A] mb-3">Composition du jury <span class="float-right text-xs text-[#9A9886] font-normal">${detailJury.size()} membres</span></p>
     <div class="divide-y divide-[#F1F2EC] text-sm">
       <c:forEach var="m" items="${detailJury}">
-      <div class="flex items-center gap-3 py-3"><span class="w-8 h-8 rounded-full bg-[#E7EFDF] text-[#5B7A4A] flex items-center justify-center text-xs">${m.enseignantnom.substring(0,2)}</span>${m.enseignantnom}<span class="ml-auto text-xs text-[#9A9886]">${m.qualitemembre == 'President' ? 'Président du jury' : 'Membre du jury'}</span></div>
+      <div class="flex items-center gap-3 py-3"><span class="w-8 h-8 rounded-full bg-[#E7EFDF] text-[#5B7A4A] flex items-center justify-center text-xs">${fn:substring(m.enseignantnom,0,2)}</span>${m.enseignantnom}<span class="ml-auto text-xs text-[#9A9886]">${m.qualitemembre == 'President' ? 'Président du jury' : 'Membre du jury'}</span></div>
       </c:forEach>
     </div>
     </c:if>
@@ -98,9 +113,4 @@
   </div>
 </div>
 <c:if test="${editSoutenance != null}"><script>window.addEventListener('load', function(){ openModal('modalModifierSoutenance'); });</script></c:if>
-
-<script>
-function openModal(id){var e=document.getElementById(id); if(e){e.classList.remove('hidden'); e.style.display='flex';}}
-function closeModal(id){var e=document.getElementById(id); if(e){e.classList.add('hidden'); e.style.display='none';}}
-</script>
 

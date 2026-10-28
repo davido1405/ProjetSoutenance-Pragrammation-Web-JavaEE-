@@ -52,7 +52,7 @@
       <p class="text-sm text-[#6E6D5F] mb-8">Vos soutenances, vos jurys et vos évaluations réunis au même endroit.</p>
 
       <div class="rounded-2xl bg-[#E7EFDF] p-8 mb-8">
-        <p class="text-xs tracking-widest uppercase text-[#5B7A4A] mb-3">Lundi 16 juin 2025</p>
+        <p class="text-xs tracking-widest uppercase text-[#5B7A4A] mb-3">${dateJour}</p>
         <h2 class="text-3xl font-medium text-[#2F3A2F] max-w-md mb-3">Bonjour ${sessionScope.ConnectedUser.prenomuser}, accompagnez les réussites de demain.</h2>
         <p class="text-sm text-[#5B5A4E] mb-5">${convocations.size()} soutenances dans vos jurys, dont ${nbAEvaluer} à évaluer.</p>
         <a href="${pageContext.request.contextPath}/Encadrer?page=mesSoutenances" class="text-sm text-[#2F5B45] font-medium">Consulter mes convocations →</a>

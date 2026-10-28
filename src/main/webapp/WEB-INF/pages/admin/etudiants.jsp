@@ -1,14 +1,36 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <div class="flex items-center justify-between px-8 py-4 bg-white border-b border-[#E9EAE2]">
       <p class="text-sm text-[#6E6D5F]">Espace administrateur <span class="mx-2">›</span> <span class="text-[#2F3A2F]">Étudiants</span></p>
       <div class="flex items-center gap-5">
         <span class="text-sm text-[#6E6D5F] border border-[#E3E1D6] rounded-md px-3 py-1.5">2024 — 2025</span>
         <div class="flex items-center gap-2">
-          <span class="w-9 h-9 rounded-full bg-[#E7EFDF] text-[#5B7A4A] flex items-center justify-center text-sm font-medium">${sessionScope.ConnectedUser.prenomuser.substring(0,1)}${sessionScope.ConnectedUser.nomuser.substring(0,1)}</span>
+          <span class="w-9 h-9 rounded-full bg-[#E7EFDF] text-[#5B7A4A] flex items-center justify-center text-sm font-medium">${fn:substring(sessionScope.ConnectedUser.prenomuser,0,1)}${fn:substring(sessionScope.ConnectedUser.nomuser,0,1)}</span>
           <div><p class="text-sm font-medium text-[#2F3A2F]">${sessionScope.ConnectedUser.nomuser} ${sessionScope.ConnectedUser.prenomuser}</p><p class="text-xs text-[#9A9886]">Administrateur</p></div>
         </div>
       </div>
+    </div>
+
+    <div class="px-8 pt-6">
+      <c:if test="${param.info == 'etudiantSupprime'}">
+        <div class="rounded-lg border border-[#C9DCC0] bg-[#EFF5EA] text-[#3F6134] px-4 py-3 text-sm">L'étudiant, sa soutenance et les évaluations associées ont été supprimés.</div>
+      </c:if>
+      <c:if test="${param.info == 'etudiantAjoute'}">
+        <div class="rounded-lg border border-[#C9DCC0] bg-[#EFF5EA] text-[#3F6134] px-4 py-3 text-sm">L'étudiant a bien été enregistré dans la base de données.</div>
+      </c:if>
+      <c:if test="${param.info == 'etudiantModifie'}">
+        <div class="rounded-lg border border-[#C9DCC0] bg-[#EFF5EA] text-[#3F6134] px-4 py-3 text-sm">Les informations de l'étudiant ont été mises à jour.</div>
+      </c:if>
+      <c:if test="${param.info == 'enregistrementImpossible'}">
+        <div class="rounded-lg border border-[#E8C8CF] bg-[#FBEEF1] text-[#A4485E] px-4 py-3 text-sm">Enregistrement impossible : vérifiez le matricule (déjà utilisé ?) et les champs obligatoires.</div>
+      </c:if>
+      <c:if test="${param.info == 'etudiantIntrouvable'}">
+        <div class="rounded-lg border border-[#E8D9B8] bg-[#FBF5E7] text-[#8A6A2F] px-4 py-3 text-sm">Étudiant introuvable : aucune suppression effectuée.</div>
+      </c:if>
+      <c:if test="${param.info == 'suppressionImpossible'}">
+        <div class="rounded-lg border border-[#E8C8CF] bg-[#FBEEF1] text-[#A4485E] px-4 py-3 text-sm">Suppression impossible : cet étudiant est encore référencé par une autre donnée.</div>
+      </c:if>
     </div>
 
     <div class="px-8 py-8">
@@ -21,7 +43,7 @@
         <div class="flex gap-3">
           <button class="border border-[#E3E1D6] bg-white rounded-lg px-4 py-2.5 text-sm">Exporter</button>
           <button type="button" onclick="openModal('modalEtudiant')" class="bg-[#2F5B45] text-white rounded-lg px-4 py-2.5 text-sm">+ Ajouter un étudiant</button>
-        </div>
+          </div>
       </div>
 
       <div class="bg-white rounded-xl border border-[#ECEEE6] p-6">
@@ -34,12 +56,12 @@
         </div>
         <table class="w-full text-sm">
           <thead><tr class="text-left text-xs tracking-widest uppercase text-[#9A9886] border-b border-[#ECEEE6]">
-            <th class="pb-3 font-medium">Étudiant</th><th class="pb-3 font-medium">Matricule</th><th class="pb-3 font-medium">Filière</th><th class="pb-3 font-medium">Encadreur</th><th class="pb-3 font-medium">Statut</th>
+            <th class="pb-3 font-medium">Étudiant</th><th class="pb-3 font-medium">Matricule</th><th class="pb-3 font-medium">Filière</th><th class="pb-3 font-medium">Encadreur</th><th class="pb-3 font-medium">Statut</th><th class="pb-3 font-medium"></th>
           </tr></thead>
           <tbody class="text-[#2F3A2F]">
             <c:forEach var="e" items="${etudiants}">
             <tr class="border-b border-[#F1F2EC]">
-              <td class="py-4 flex items-center gap-3"><span class="w-9 h-9 rounded-full bg-[#E7EFDF] text-[#5B7A4A] flex items-center justify-center text-xs">${e.prenomuser.substring(0,1)}${e.nomuser.substring(0,1)}</span><div><p class="font-medium">${e.nomuser} ${e.prenomuser}</p><p class="text-xs text-[#9A9886]">${e.emailuser}</p></div></td>
+              <td class="py-4"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-full bg-[#E7EFDF] text-[#5B7A4A] flex items-center justify-center text-xs">${fn:substring(e.prenomuser,0,1)}${fn:substring(e.nomuser,0,1)}</span><div><p class="font-medium">${e.nomuser} ${e.prenomuser}</p><p class="text-xs text-[#9A9886]">${e.emailuser}</p></div></div></td>
               <td>${e.matriculEtu}</td>
               <td>${e.filiereLib}</td>
               <td>${e.encadrantNom}</td>
@@ -55,7 +77,7 @@
                 <form action="${pageContext.request.contextPath}/administrateur?page=etudiants" method="post" class="inline">
                   <input type="hidden" name="action" value="deleteEtudiant">
                   <input type="hidden" name="matricule" value="${e.matriculEtu}">
-                  <button type="submit" class="text-xs text-[#B05B74] hover:underline" onclick="return confirm('Supprimer cet étudiant ?');">Supprimer</button>
+                  <button type="submit" class="text-xs text-[#B05B74] hover:underline" onclick="return confirm('Supprimer cet étudiant ? Sa soutenance et les évaluations associées seront également supprimées.');">Supprimer</button>
                 </form>
               </td>
             </tr>
@@ -72,7 +94,7 @@
       <span class="w-11 h-11 rounded-lg bg-[#E7EFDF] flex items-center justify-center"><svg class="w-5 h-5 text-[#5B7A4A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M22 9 12 4 2 9l10 5 10-5Z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></span>
       <button type="button" onclick="closeModal('modalEtudiant')" class="text-[#9A9886] hover:text-[#2F3A2F] text-xl leading-none">×</button>
     </div>
-    <h2 class="text-2xl font-medium text-[#2F3A2F] mb-1">Ajouter un étudiant</h2>
+    <h2 class="text-2xl font-medium text-[#2F3A2F] mb-1">${editEtudiant != null ? 'Modifier un étudiant' : 'Ajouter un étudiant'}</h2>
     <p class="text-sm text-[#6E6D5F] mb-6">Complétez les informations pour enrichir votre répertoire.</p>
     <form action="${pageContext.request.contextPath}/administrateur?page=etudiants" method="post" class="flex flex-col gap-4">
       <input type="hidden" name="action" value="${editEtudiant != null ? 'updateEtudiant' : 'ajouter'}">
@@ -81,7 +103,7 @@
         <div><label class="block text-sm text-[#2F3A2F] mb-1.5">Prénom</label><input name="prenom" required value="${editEtudiant != null ? editEtudiant.prenomuser : ''}" class="w-full border border-[#E3E1D6] rounded-lg px-4 py-3 text-sm outline-none"></div>
       </div>
       <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-sm text-[#2F3A2F] mb-1.5">Matricule</label><input name="matricule" required placeholder="ETU006" value="${editEtudiant != null ? editEtudiant.matriculEtu : ''}" class="w-full border border-[#E3E1D6] rounded-lg px-4 py-3 text-sm outline-none"></div>
+        <div><label class="block text-sm text-[#2F3A2F] mb-1.5">Matricule</label><input name="matricule" required placeholder="ETU006" value="${editEtudiant != null ? editEtudiant.matriculEtu : ''}" ${editEtudiant != null ? 'readonly' : ''} class="w-full border border-[#E3E1D6] rounded-lg px-4 py-3 text-sm outline-none"></div>
         <div><label class="block text-sm text-[#2F3A2F] mb-1.5">Filière</label><select name="id_filiere" class="w-full border border-[#E3E1D6] rounded-lg px-4 py-3 text-sm">
           <c:forEach var="f" items="${filieres}"><option value="${f[0]}" ${editEtudiant != null && editEtudiant.filiere == f[0] ? 'selected' : ''}>${f[1]}</option></c:forEach>
         </select></div>
@@ -101,16 +123,12 @@
       </select></div>
       <div class="flex justify-end gap-3 mt-4 pt-5 border-t border-[#F1F2EC]">
         <button type="button" onclick="closeModal('modalEtudiant')" class="border border-[#E3E1D6] rounded-lg px-5 py-2.5 text-sm">Annuler</button>
-        <button type="submit" class="bg-[#2F5B45] text-white rounded-lg px-5 py-2.5 text-sm">✓ Enregistrer</button>
+        <button type="submit" class="bg-[#2F5B45] text-white rounded-lg px-5 py-2.5 text-sm">${editEtudiant != null ? '✓ Mettre à jour' : '✓ Enregistrer'}</button>
       </div>
     </form>
   </div>
 </div>
 
-<script>
-function openModal(id){var e=document.getElementById(id); if(e){e.classList.remove('hidden'); e.style.display='flex';}}
-function closeModal(id){var e=document.getElementById(id); if(e){e.classList.add('hidden'); e.style.display='none';}}
-<c:if test="${editEtudiant != null}">openModal('modalEtudiant');</c:if>
-</script>
+<c:if test="${editEtudiant != null}"><script>window.addEventListener('load', function(){ openModal('modalEtudiant'); });</script></c:if>
 
 

@@ -38,6 +38,7 @@ public class Encadrer extends HttpServlet {
 		if (page == null) page = "tableauDeBord";
 
 		try {
+			request.setAttribute("dateJour", utils.DateUtils.aujourdHui());
 			java.util.List<models.Soutenance> convocations = SoutenanceDAO.getByEnseignant(enseignant.getMatriculEns());
 			String q = request.getParameter("q");
 			if (q != null && !q.trim().isEmpty()) {

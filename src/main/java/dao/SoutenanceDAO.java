@@ -32,6 +32,18 @@ public class SoutenanceDAO {
 		return 0;
 	}
 
+	//Soutenances planifiées dans les 7 prochains jours (hors annulées)
+	public static int nbSoutenancesSemaine() throws SQLException {
+		String req = "SELECT COUNT(*) FROM soutenance "
+		           + "WHERE statut <> 'ANNULEE' AND date_heure_soutenance BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)";
+		try (Connection connexion = ConnexionBD.getConnection();
+		     PreparedStatement p = connexion.prepareStatement(req);
+		     ResultSet rs = p.executeQuery()) {
+			if (rs.next()) return rs.getInt(1);
+		}
+		return 0;
+	}
+
 	//Toutes les soutenances avec infos étudiant
 	public static List<Soutenance> getAll() throws SQLException {
 		List<Soutenance> liste = new ArrayList<>();
